@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { Product } from '../../modules/stock/entities/product.entity';
+import { Product } from '../../modules/products/infraestructure/entities/Product.entity';
 import { AppDataSource } from '../config/data-source';
 
 const products: Partial<Product>[] = [
