@@ -1,10 +1,14 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Product } from './modules/stock/entities/product.entity';
-import { Customer } from './modules/customers/entities/customer.entity';
-import { Transaction } from './modules/transactions/entities/transaction.entity';
-import { Delivery } from './modules/deliveries/entities/delivery.entity';
+import { Product } from './modules/stock/entities/product.entity.js';
+import { Customer } from './modules/customers/entities/customer.entity.js';
+import { Transaction } from './modules/transactions/entities/transaction.entity.js';
+import { Delivery } from './modules/deliveries/entities/delivery.entity.js';
+import { StockModule } from './modules/stock/stock.module.js';
+import { CustomersModule } from './modules/customers/customers.module.js';
+import { TransactionsModule } from './modules/transactions/transactions.module.js';
+import { DeliveriesModule } from './modules/deliveries/deliveries.module.js';
 
 @Module({
   imports: [
@@ -25,6 +29,10 @@ import { Delivery } from './modules/deliveries/entities/delivery.entity';
         logging: config.get<string>('NODE_ENV') === 'development',
       }),
     }),
+    StockModule,
+    CustomersModule,
+    TransactionsModule,
+    DeliveriesModule,
   ],
   controllers: [],
   providers: [],
