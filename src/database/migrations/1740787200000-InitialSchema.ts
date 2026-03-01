@@ -2,6 +2,8 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class InitialSchema1740787200000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`CREATE EXTENSION IF NOT EXISTS "pgcrypto"`);
+
     await queryRunner.query(`
       CREATE TYPE transaction_status AS ENUM ('PENDING', 'APPROVED', 'FAILED')
     `);
