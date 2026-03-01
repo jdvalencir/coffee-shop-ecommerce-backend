@@ -18,11 +18,11 @@ export class InsufficientStockError extends DomainError {
 }
 
 export class PaymentProviderError extends DomainError {
+  public readonly details: string;
+
   constructor(details: string) {
-    super(
-      `El proveedor de pagos rechazó la transacción: ${details}`,
-      'PAYMENT_REJECTED',
-    );
+    super(`El proveedor de pagos rechazó la transacción`, 'PAYMENT_REJECTED');
+    this.details = details;
   }
 }
 

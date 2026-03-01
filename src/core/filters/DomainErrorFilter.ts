@@ -6,21 +6,23 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { DomainError } from '../errors/DomainError';
+import {
+  DOMAIN_ERROR_STATUS_MAP,
+  DomainErrorCode,
+} from '../infraestructure/http/DomainErrorStatusMap';
 
 @Catch(DomainError)
 export class DomainErrorFilter implements ExceptionFilter {
-  private readonly statusMap: Record<string, HttpStatus> = {
-    INSUFFICIENT_STOCK: HttpStatus.CONFLICT,
-    PAYMENT_REJECTED: HttpStatus.BAD_REQUEST,
-    PRODUCT_NOT_FOUND: HttpStatus.NOT_FOUND,
-  };
+  private readonly statusMap: Record<DomainErrorCode, HttpStatus> =
+    DOMAIN_ERROR_STATUS_MAP;
 
   catch(exception: DomainError, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
 
-    const status =
-      this.statusMap[exception.code] || HttpStatus.INTERNAL_SERVER_ERROR;
+    const status: HttpStatus =
+      (this.statusMap[exception.code] as HttpStatus) ??
+      HttpStatus.INTERNAL_SERVER_ERROR;
 
     response.status(status).json({
       success: false,
