@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { CustomersModule } from './modules/customers/customers.module.js';
-import { Customer } from './modules/customers/entities/customer.entity.js';
-import { DeliveriesModule } from './modules/deliveries/deliveries.module.js';
-import { Delivery } from './modules/deliveries/entities/delivery.entity.js';
-import { Product } from './modules/stock/entities/product.entity.js';
-import { StockModule } from './modules/stock/stock.module.js';
-import { Transaction } from './modules/transactions/entities/transaction.entity.js';
-import { TransactionsModule } from './modules/transactions/transactions.module.js';
+import { CustomersModule } from './modules/customers/customers.module';
+import { Customer } from './modules/customers/entities/customer.entity';
+import { DeliveriesModule } from './modules/deliveries/deliveries.module';
+import { Delivery } from './modules/deliveries/entities/delivery.entity';
+import { Product } from './modules/stock/entities/product.entity';
+import { StockModule } from './modules/stock/stock.module';
+import { Transaction } from './modules/transactions/entities/transaction.entity';
+import { TransactionsModule } from './modules/transactions/transactions.module';
 
 @Module({
   imports: [
