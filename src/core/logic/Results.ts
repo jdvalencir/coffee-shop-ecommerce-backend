@@ -14,17 +14,17 @@ export class Result<T, E extends DomainError = DomainError> {
   }
 
   public getValue(): T {
-    if (!this.isSuccess || this._value === null) {
+    if (this.isFailure) {
       throw new Error('No se puede obtener el valor de un resultado fallido.');
     }
-    return this._value;
+    return this._value as T;
   }
 
   public static ok<U>(value: U): Result<U, never> {
     return new Result<U, never>(true, null, value);
   }
 
-  public static fail<U, E extends DomainError>(error: E): Result<U, E> {
-    return new Result<U, E>(false, error, null);
+  public static fail<E extends DomainError>(error: E): Result<never, E> {
+    return new Result<never, E>(false, error, null);
   }
 }
