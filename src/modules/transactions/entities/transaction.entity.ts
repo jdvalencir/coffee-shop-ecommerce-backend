@@ -23,6 +23,7 @@ export class Transaction {
   @Column({
     type: 'enum',
     enum: TransactionStatus,
+    enumName: 'transaction_status',
     default: TransactionStatus.PENDING,
   })
   status: TransactionStatus;
@@ -37,12 +38,12 @@ export class Transaction {
   deliveryFee: number;
 
   @Column({
-    name: 'transaction_id',
+    name: 'provider_transaction_id',
     type: 'varchar',
     length: 255,
     nullable: true,
   })
-  wompiTransactionId: string | null;
+  providerTransactionId: string | null;
 
   @ManyToOne(() => Product)
   @JoinColumn({ name: 'product_id' })

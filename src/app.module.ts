@@ -1,10 +1,14 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Product } from './modules/stock/entities/product.entity';
+import { CustomersModule } from './modules/customers/customers.module';
 import { Customer } from './modules/customers/entities/customer.entity';
-import { Transaction } from './modules/transactions/entities/transaction.entity';
+import { DeliveriesModule } from './modules/deliveries/deliveries.module';
 import { Delivery } from './modules/deliveries/entities/delivery.entity';
+import { Product } from './modules/stock/entities/product.entity';
+import { StockModule } from './modules/stock/stock.module';
+import { Transaction } from './modules/transactions/entities/transaction.entity';
+import { TransactionsModule } from './modules/transactions/transactions.module';
 
 @Module({
   imports: [
@@ -15,7 +19,7 @@ import { Delivery } from './modules/deliveries/entities/delivery.entity';
       useFactory: (config: ConfigService) => ({
         type: 'postgres',
         host: config.get<string>('DB_HOST', 'localhost'),
-        port: config.get<number>('DB_PORT', 5432),
+        port: parseInt(config.get<string>('DB_PORT', '5432'), 10),
         username: config.get<string>('DB_USER', 'postgres'),
         password: config.get<string>('DB_PASSWORD', 'postgres'),
         database: config.get<string>('DB_NAME', 'coffee_shop'),
@@ -25,6 +29,10 @@ import { Delivery } from './modules/deliveries/entities/delivery.entity';
         logging: config.get<string>('NODE_ENV') === 'development',
       }),
     }),
+    StockModule,
+    CustomersModule,
+    TransactionsModule,
+    DeliveriesModule,
   ],
   controllers: [],
   providers: [],

@@ -1,6 +1,6 @@
 import 'reflect-metadata';
-import { AppDataSource } from '../config/data-source';
 import { Product } from '../../modules/stock/entities/product.entity';
+import { AppDataSource } from '../config/data-source';
 
 const products: Partial<Product>[] = [
   {
@@ -86,22 +86,28 @@ const products: Partial<Product>[] = [
 ];
 
 async function runSeed() {
-  await AppDataSource.initialize();
-  console.log('Database connection established.');
+  let initialized = false;
 
-  const productRepo = AppDataSource.getRepository(Product);
+  try {
+    await AppDataSource.initialize();
+    initialized = true;
+    console.log('Database connection established.');
 
-  const existing = await productRepo.count();
-  if (existing > 0) {
-    console.log(`Seed skipped: ${existing} products already exist.`);
-    await AppDataSource.destroy();
-    return;
+    const productRepo = AppDataSource.getRepository(Product);
+
+    const existing = await productRepo.count();
+    if (existing > 0) {
+      console.log(`Seed skipped: ${existing} products already exist.`);
+      return;
+    }
+
+    await productRepo.save(products);
+    console.log(`Seed complete: ${products.length} products inserted.`);
+  } finally {
+    if (initialized) {
+      await AppDataSource.destroy();
+    }
   }
-
-  await productRepo.save(products);
-  console.log(`Seed complete: ${products.length} products inserted.`);
-
-  await AppDataSource.destroy();
 }
 
 runSeed().catch((err) => {
