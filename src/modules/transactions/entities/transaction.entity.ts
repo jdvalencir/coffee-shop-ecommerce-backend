@@ -23,6 +23,7 @@ export class Transaction {
   @Column({
     type: 'enum',
     enum: TransactionStatus,
+    enumName: 'transaction_status',
     default: TransactionStatus.PENDING,
   })
   status: TransactionStatus;
