@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Product } from './modules/stock/entities/product.entity.js';
-import { Customer } from './modules/customers/entities/customer.entity.js';
-import { Transaction } from './modules/transactions/entities/transaction.entity.js';
-import { Delivery } from './modules/deliveries/entities/delivery.entity.js';
-import { StockModule } from './modules/stock/stock.module.js';
 import { CustomersModule } from './modules/customers/customers.module.js';
-import { TransactionsModule } from './modules/transactions/transactions.module.js';
+import { Customer } from './modules/customers/entities/customer.entity.js';
 import { DeliveriesModule } from './modules/deliveries/deliveries.module.js';
+import { Delivery } from './modules/deliveries/entities/delivery.entity.js';
+import { Product } from './modules/stock/entities/product.entity.js';
+import { StockModule } from './modules/stock/stock.module.js';
+import { Transaction } from './modules/transactions/entities/transaction.entity.js';
+import { TransactionsModule } from './modules/transactions/transactions.module.js';
 
 @Module({
   imports: [
@@ -19,7 +19,7 @@ import { DeliveriesModule } from './modules/deliveries/deliveries.module.js';
       useFactory: (config: ConfigService) => ({
         type: 'postgres',
         host: config.get<string>('DB_HOST', 'localhost'),
-        port: config.get<number>('DB_PORT', 5432),
+        port: parseInt(config.get<string>('DB_PORT', '5432'), 10),
         username: config.get<string>('DB_USER', 'postgres'),
         password: config.get<string>('DB_PASSWORD', 'postgres'),
         database: config.get<string>('DB_NAME', 'coffee_shop'),
