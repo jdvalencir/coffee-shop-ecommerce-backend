@@ -2,12 +2,12 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CustomersModule } from './modules/customers/customers.module';
-import { Customer } from './modules/customers/entities/customer.entity';
+import { Customer } from './modules/customers/infraestructure/entities/Customer.entity';
 import { DeliveriesModule } from './modules/deliveries/deliveries.module';
-import { Delivery } from './modules/deliveries/entities/delivery.entity';
-import { Product } from './modules/stock/entities/product.entity';
-import { StockModule } from './modules/stock/stock.module';
-import { Transaction } from './modules/transactions/entities/transaction.entity';
+import { Delivery } from './modules/deliveries/infraestructure/entities/Delivery.entity';
+import { Product } from './modules/products/infraestructure/entities/Product.entity';
+import { StockModule } from './modules/products/stock.module';
+import { Transaction } from './modules/transactions/infraestructure/entities/Transaction.entity';
 import { TransactionsModule } from './modules/transactions/transactions.module';
 
 @Module({
@@ -34,7 +34,6 @@ import { TransactionsModule } from './modules/transactions/transactions.module';
     TransactionsModule,
     DeliveriesModule,
   ],
-  controllers: [],
   providers: [],
 })
 export class AppModule {}
