@@ -37,7 +37,7 @@ export class Transaction {
   deliveryFee: number;
 
   @Column({
-    name: 'wompi_transaction_id',
+    name: 'transaction_id',
     type: 'varchar',
     length: 255,
     nullable: true,

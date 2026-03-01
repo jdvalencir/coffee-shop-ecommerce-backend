@@ -35,7 +35,7 @@ export class InitialSchema1740787200000 implements MigrationInterface {
         amount integer NOT NULL,
         base_fee integer DEFAULT 0,
         delivery_fee integer DEFAULT 0,
-        wompi_transaction_id varchar(255),
+        transaction_id varchar(255),
         product_id uuid NOT NULL REFERENCES products(id),
         customer_id uuid NOT NULL REFERENCES customers(id),
         created_at timestamp DEFAULT CURRENT_TIMESTAMP
