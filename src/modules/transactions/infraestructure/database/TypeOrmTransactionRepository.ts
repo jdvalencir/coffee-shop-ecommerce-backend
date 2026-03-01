@@ -1,0 +1,74 @@
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { TransactionRepositoryPort } from '../../application/ports/TransactionRepository.interface';
+import { Transaction, TransactionStatus } from '../entities/Transaction.entity';
+
+@Injectable()
+export class TypeOrmTransactionRepository implements TransactionRepositoryPort {
+  constructor(
+    @InjectRepository(Transaction)
+    private readonly repo: Repository<Transaction>,
+  ) {}
+
+  async createPending(data: {
+    amount: number;
+    productId: string;
+    customerId: string;
+  }): Promise<{ id: string }> {
+    const tx = this.repo.create({
+      amount: data.amount,
+      status: TransactionStatus.PENDING,
+      product: { id: data.productId },
+      customer: { id: data.customerId },
+    });
+    const saved = await this.repo.save(tx);
+    return { id: saved.id };
+  }
+
+  async updateStatus(
+    id: string,
+    status: 'APPROVED' | 'FAILED',
+    gatewayId?: string,
+  ): Promise<void> {
+    const transactionStatus =
+      status === 'APPROVED'
+        ? TransactionStatus.APPROVED
+        : TransactionStatus.FAILED;
+
+    await this.repo.update(id, {
+      status: transactionStatus,
+      providerTransactionId: gatewayId,
+    });
+  }
+
+  async findByIdWithDetails(id: string) {
+    const tx = await this.repo.findOne({
+      where: { id },
+      relations: ['product', 'customer', 'delivery'],
+    });
+
+    if (!tx) {
+      return null;
+    }
+
+    return {
+      id: tx.id,
+      amount: tx.amount,
+      status: tx.status,
+      product: { id: tx.product.id, name: tx.product.name },
+      customer: {
+        id: tx.customer.id,
+        name: tx.customer.fullName,
+        email: tx.customer.email,
+      },
+      delivery: tx.delivery
+        ? {
+            address: tx.delivery.address,
+            city: tx.delivery.city,
+            region: tx.delivery.region,
+          }
+        : null,
+    };
+  }
+}
