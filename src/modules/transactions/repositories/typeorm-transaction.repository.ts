@@ -18,9 +18,11 @@ export class TypeOrmTransactionRepository implements ITransactionRepository {
     });
   }
 
-  findByWompiId(wompiId: string): Promise<Transaction | null> {
+  findByProviderTransactionId(
+    providerTransactionId: string,
+  ): Promise<Transaction | null> {
     return this.repo.findOne({
-      where: { wompiTransactionId: wompiId },
+      where: { providerTransactionId },
       relations: ['product', 'customer'],
     });
   }
