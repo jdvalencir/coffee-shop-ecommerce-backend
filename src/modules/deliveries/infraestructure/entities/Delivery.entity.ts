@@ -5,7 +5,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Transaction } from '../../transactions/entities/transaction.entity';
+import { Transaction } from '../../../transactions/infraestructure/entities/Transaction.entity';
 
 @Entity('deliveries')
 export class Delivery {
@@ -21,7 +21,7 @@ export class Delivery {
   @Column({ type: 'varchar', length: 100 })
   region: string;
 
-  @OneToOne(() => Transaction)
+  @OneToOne(() => Transaction, (transaction) => transaction.delivery)
   @JoinColumn({ name: 'transaction_id' })
   transaction: Transaction;
 }
