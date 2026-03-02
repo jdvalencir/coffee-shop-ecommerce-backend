@@ -27,6 +27,9 @@ import { TransactionsModule } from './modules/transactions/transactions.module';
         migrations: [],
         synchronize: false,
         logging: config.get<string>('NODE_ENV') === 'development',
+        ssl: process.env.DB_HOST?.includes('rds')
+          ? { rejectUnauthorized: false }
+          : false,
       }),
     }),
     StockModule,
