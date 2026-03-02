@@ -3,7 +3,7 @@ import { DataSource } from 'typeorm';
 import * as dotenv from 'dotenv';
 import { join } from 'path';
 
-dotenv.config();
+dotenv.config({ quiet: true });
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
