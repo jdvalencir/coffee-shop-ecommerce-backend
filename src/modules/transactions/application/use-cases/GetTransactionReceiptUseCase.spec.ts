@@ -4,9 +4,12 @@ import { GetTransactionReceiptUseCase } from './GetTransactionReceiptUseCase';
 describe('GetTransactionReceiptUseCase', () => {
   const transactionDetails = {
     id: 'tx-1',
-    amount: 250000,
+    amount: 263500,
+    baseFee: 1500,
+    deliveryFee: 12000,
     providerTransactionId: 'provider-1',
     status: 'PENDING' as const,
+    createdAt: new Date('2026-03-02T14:30:00.000Z'),
     product: { id: 'prod-1', name: 'Cafe' },
     customer: {
       id: 'cust-1',
@@ -82,8 +85,13 @@ describe('GetTransactionReceiptUseCase', () => {
     expect(result.isSuccess).toBe(true);
     expect(result.getValue()).toEqual({
       transactionId: 'tx-1',
-      amount: 250000,
-      status: 'PENDING',
+      subtotal: 250000,
+      baseFee: 1500,
+      deliveryFee: 12000,
+      total: 263500,
+      amount: 263500,
+      status: 'APPROVED',
+      createdAt: transactionDetails.createdAt,
       product: transactionDetails.product,
       customer: transactionDetails.customer,
       delivery: transactionDetails.delivery,
@@ -103,6 +111,7 @@ describe('GetTransactionReceiptUseCase', () => {
     expect(deps.txRepo.updateStatus).toHaveBeenCalledWith('tx-1', 'FAILED');
     expect(deps.productRepository.decreaseStock).not.toHaveBeenCalled();
     expect(result.isSuccess).toBe(true);
+    expect(result.getValue().status).toBe('FAILED');
   });
 
   it('keeps the transaction unchanged when the gateway still reports PENDING', async () => {
@@ -119,6 +128,7 @@ describe('GetTransactionReceiptUseCase', () => {
     expect(deps.txRepo.updateStatus).not.toHaveBeenCalled();
     expect(deps.productRepository.decreaseStock).not.toHaveBeenCalled();
     expect(result.isSuccess).toBe(true);
+    expect(result.getValue().status).toBe('PENDING');
   });
 
   it('returns the current receipt without querying the gateway when status is final', async () => {

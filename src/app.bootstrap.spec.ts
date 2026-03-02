@@ -5,6 +5,7 @@ jest.mock('@nestjs/core', () => ({
   __mockUseGlobalPipes: jest.fn(),
   __mockListen: jest.fn().mockResolvedValue(undefined),
   __mockApp: {
+    enableCors: jest.fn(),
     useGlobalPipes: jest.fn(),
     listen: jest.fn().mockResolvedValue(undefined),
   },
@@ -40,6 +41,7 @@ jest.mock('@nestjs/swagger', () => {
       createDocument: jest.fn(),
       setup: jest.fn(),
     },
+    ApiParam: () => () => undefined,
     ApiProperty: () => () => undefined,
     ApiCreatedResponse: () => () => undefined,
     ApiOkResponse: () => () => undefined,
@@ -54,6 +56,7 @@ type NestCoreMock = {
   __mockUseGlobalPipes: jest.Mock;
   __mockListen: jest.Mock;
   __mockApp: {
+    enableCors: jest.Mock;
     useGlobalPipes: jest.Mock;
     listen: jest.Mock;
   };
@@ -149,7 +152,7 @@ describe('Bootstrap and structural coverage', () => {
     const appImports = Reflect.getMetadata(MODULE_METADATA.IMPORTS, AppModule);
 
     expect(stockImports).toHaveLength(1);
-    expect(stockProviders).toHaveLength(2);
+    expect(stockProviders).toHaveLength(3);
     expect(customerExports).toHaveLength(1);
     expect(deliveryExports).toHaveLength(1);
     expect(transactionControllers).toHaveLength(1);
@@ -248,11 +251,11 @@ describe('Bootstrap and structural coverage', () => {
       expect.stringContaining('CREATE TABLE deliveries'),
     );
     expect(queryRunner.query).toHaveBeenNthCalledWith(
-      7,
+      8,
       'DROP TABLE IF EXISTS deliveries',
     );
     expect(queryRunner.query).toHaveBeenNthCalledWith(
-      11,
+      13,
       'DROP TYPE IF EXISTS transaction_status',
     );
   });

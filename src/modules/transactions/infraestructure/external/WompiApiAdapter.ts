@@ -81,8 +81,6 @@ export class WompiApiAdapter implements PaymentGatewayPort {
         ),
       );
 
-      console.log('Respuesta de Wompi:', response.data);
-
       const wompiData = response.data.data;
 
       return {
@@ -92,8 +90,6 @@ export class WompiApiAdapter implements PaymentGatewayPort {
         status: wompiData.status,
       };
     } catch (error) {
-      console.error('Error al procesar pago con Wompi:', error);
-
       const axiosError = error as {
         response?: { data?: any };
         message?: string;
@@ -135,7 +131,6 @@ export class WompiApiAdapter implements PaymentGatewayPort {
         status: wompiData.status,
       };
     } catch (error) {
-      console.error('Error al consultar estado en Wompi:', error);
       return {
         isSuccess: false,
         status: 'ERROR',

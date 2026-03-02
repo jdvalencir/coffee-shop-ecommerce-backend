@@ -16,8 +16,44 @@ export class ProductItemResponseDto {
   @ApiProperty({ example: 12 })
   stock: number;
 
-  @ApiProperty({ example: 'https://cdn.example.com/products/cafe-origen.jpg' })
-  imageUrl: string;
+  @ApiProperty({
+    example: 'https://cdn.example.com/products/cafe-origen.jpg',
+    required: false,
+  })
+  imageUrl?: string;
+
+  @ApiProperty({
+    example: '/static/products/cafe-origen.jpg',
+    required: false,
+  })
+  image?: string;
+
+  @ApiProperty({
+    enum: ['LIGHT', 'MEDIUM', 'MEDIUM_DARK', 'DARK'],
+    example: 'MEDIUM',
+    required: false,
+  })
+  roastLevel?: string;
+
+  @ApiProperty({
+    example: 'Huila, Colombia',
+    required: false,
+  })
+  origin?: string;
+
+  @ApiProperty({
+    example: 500,
+    description: 'Peso del producto en gramos',
+    required: false,
+  })
+  weight?: number;
+
+  @ApiProperty({
+    example: ['chocolate', 'caramelo', 'ciruela'],
+    required: false,
+    type: [String],
+  })
+  notes?: string[];
 
   @ApiProperty({
     example: '2026-03-01T15:30:00.000Z',
@@ -32,4 +68,12 @@ export class GetAvailableProductsResponseDto {
 
   @ApiProperty({ type: () => ProductItemResponseDto, isArray: true })
   products: ProductItemResponseDto[];
+}
+
+export class GetProductByIdResponseDto {
+  @ApiProperty({ example: true })
+  success: boolean;
+
+  @ApiProperty({ type: () => ProductItemResponseDto })
+  product: ProductItemResponseDto;
 }

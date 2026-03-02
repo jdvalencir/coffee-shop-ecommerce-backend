@@ -13,11 +13,15 @@ export class TypeOrmTransactionRepository implements TransactionRepositoryPort {
 
   async createPending(data: {
     amount: number;
+    baseFee: number;
+    deliveryFee: number;
     productId: string;
     customerId: string;
   }): Promise<{ id: string }> {
     const tx = this.repo.create({
       amount: data.amount,
+      baseFee: data.baseFee,
+      deliveryFee: data.deliveryFee,
       status: TransactionStatus.PENDING,
       product: { id: data.productId },
       customer: { id: data.customerId },
@@ -38,10 +42,15 @@ export class TypeOrmTransactionRepository implements TransactionRepositoryPort {
           ? TransactionStatus.FAILED
           : TransactionStatus.PENDING;
 
-    await this.repo.update(id, {
+    const updatePayload: Partial<Transaction> = {
       status: transactionStatus,
-      providerTransactionId: gatewayId,
-    });
+    };
+
+    if (gatewayId !== undefined) {
+      updatePayload.providerTransactionId = gatewayId;
+    }
+
+    await this.repo.update(id, updatePayload);
   }
 
   async findByIdWithDetails(id: string) {
@@ -57,8 +66,11 @@ export class TypeOrmTransactionRepository implements TransactionRepositoryPort {
     return {
       id: tx.id,
       amount: tx.amount,
+      baseFee: tx.baseFee,
+      deliveryFee: tx.deliveryFee,
       providerTransactionId: tx.providerTransactionId || '',
       status: tx.status as 'APPROVED' | 'FAILED' | 'PENDING',
+      createdAt: tx.createdAt,
       product: { id: tx.product.id, name: tx.product.name },
       customer: {
         id: tx.customer.id,
