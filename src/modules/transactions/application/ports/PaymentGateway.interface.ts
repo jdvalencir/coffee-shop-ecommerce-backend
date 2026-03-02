@@ -14,4 +14,5 @@ export interface PaymentResponse {
 
 export interface PaymentGatewayPort {
   processPayment(request: PaymentRequest): Promise<PaymentResponse>;
+  checkStatus(providerTransactionId: string): Promise<PaymentResponse>;
 }

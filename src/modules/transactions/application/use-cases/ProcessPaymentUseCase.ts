@@ -9,7 +9,7 @@ import {
 import type { CustomerRepositoryPort } from 'src/modules/customers/application/ports/CustomerRepository.interface';
 import type { DeliveryRepositoryPort } from 'src/modules/deliveries/application/ports/DeliveryRepository.interface';
 import type { StockRepositoryPort } from 'src/modules/products/application/ports/StockRepository.interface';
-import { PaymentProviderError } from '../../../../core/errors/DomainError';
+import { PaymentProviderError } from '../../domain/errors/TransactionErrors';
 import type {
   PaymentGatewayPort,
   PaymentRequest,
@@ -20,7 +20,6 @@ export interface ProcessPaymentDto {
   amount: number;
   cardToken: string;
   productId: string;
-  customerId: string;
   fullName: string;
   email: string;
   phone: string;
@@ -52,7 +51,7 @@ export class ProcessPaymentUseCase {
       );
     }
 
-    await this.customerRepository.createOrFind({
+    const customer = await this.customerRepository.createOrFind({
       fullName: dto.fullName,
       email: dto.email,
       phone: dto.phone,
@@ -61,7 +60,7 @@ export class ProcessPaymentUseCase {
     const pendingTx = await this.txRepo.createPending({
       amount: dto.amount,
       productId: dto.productId,
-      customerId: dto.customerId,
+      customerId: customer.id,
     });
 
     await this.deliveryRepository.create({
@@ -72,25 +71,27 @@ export class ProcessPaymentUseCase {
     });
 
     const request: PaymentRequest = {
-      amountInCents: dto.amount * 100,
+      amountInCents: dto.amount,
       customerEmail: dto.email,
       reference: pendingTx.id,
       paymentMethodToken: dto.cardToken,
     };
 
-    const wompiRes = await this.paymentGateway.processPayment(request);
+    const response = await this.paymentGateway.processPayment(request);
 
-    if (!wompiRes.isSuccess) {
+    console.log('Payment gateway response:', response);
+
+    if (!response.isSuccess) {
       await this.txRepo.updateStatus(pendingTx.id, 'FAILED');
       return Result.fail(
-        new PaymentProviderError(wompiRes.errorMessage || 'Declinada'),
+        new PaymentProviderError(response.errorMessage || 'Declinada'),
       );
     }
 
     await this.txRepo.updateStatus(
       pendingTx.id,
-      'APPROVED',
-      wompiRes.providerTransactionId,
+      response.status === 'APPROVED' ? 'APPROVED' : 'PENDING',
+      response.providerTransactionId,
     );
     return Result.ok(pendingTx.id);
   }
