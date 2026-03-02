@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PRODUCT_REPOSITORY } from '../../core/tokens';
 import { GetAvailableProductsUseCase } from './application/use-cases/GetAvailableProductsUseCase';
+import { GetProductByIdUseCase } from './application/use-cases/GetProductByIdUseCase';
 import { ProductController } from './infraestructure/controllers/ProductController';
 import { TypeOrmStockRepository } from './infraestructure/database/TypeOrmStockRepository';
 import { Product } from './infraestructure/entities/Product.entity';
@@ -11,6 +12,7 @@ import { Product } from './infraestructure/entities/Product.entity';
   controllers: [ProductController],
   providers: [
     GetAvailableProductsUseCase,
+    GetProductByIdUseCase,
     {
       provide: PRODUCT_REPOSITORY,
       useClass: TypeOrmStockRepository,

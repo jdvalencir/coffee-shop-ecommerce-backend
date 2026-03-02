@@ -9,13 +9,22 @@ export class InitialSchema1740787200000 implements MigrationInterface {
     `);
 
     await queryRunner.query(`
+      CREATE TYPE product_roast_level AS ENUM ('LIGHT', 'MEDIUM', 'MEDIUM_DARK', 'DARK')
+    `);
+
+    await queryRunner.query(`
       CREATE TABLE products (
         id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
         name varchar(255) NOT NULL,
         description text NOT NULL,
         price integer NOT NULL,
         stock integer NOT NULL,
-        image_url varchar(500) NOT NULL,
+        image_url varchar(500),
+        image varchar(500),
+        roast_level product_roast_level,
+        origin varchar(255),
+        weight integer,
+        notes text[],
         created_at timestamp DEFAULT CURRENT_TIMESTAMP
       )
     `);
@@ -60,6 +69,7 @@ export class InitialSchema1740787200000 implements MigrationInterface {
     await queryRunner.query(`DROP TABLE IF EXISTS transactions`);
     await queryRunner.query(`DROP TABLE IF EXISTS customers`);
     await queryRunner.query(`DROP TABLE IF EXISTS products`);
+    await queryRunner.query(`DROP TYPE IF EXISTS product_roast_level`);
     await queryRunner.query(`DROP TYPE IF EXISTS transaction_status`);
   }
 }
