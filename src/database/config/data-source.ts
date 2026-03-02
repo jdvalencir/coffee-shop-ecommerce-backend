@@ -1,9 +1,11 @@
-import 'reflect-metadata';
-import { DataSource } from 'typeorm';
 import * as dotenv from 'dotenv';
 import { join } from 'path';
+import 'reflect-metadata';
+import { DataSource } from 'typeorm';
 
 dotenv.config({ quiet: true });
+
+const isRDS = process.env.DB_HOST?.includes('rds');
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -16,4 +18,5 @@ export const AppDataSource = new DataSource({
   migrations: [join(__dirname, '../migrations/*{.ts,.js}')],
   synchronize: false,
   logging: process.env.NODE_ENV === 'development',
+  ssl: isRDS ? { rejectUnauthorized: false } : false,
 });
