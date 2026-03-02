@@ -1,6 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsEmail, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  IsUUID,
+} from 'class-validator';
 
 export class CreatePaymentDto {
   @ApiProperty({ example: 25000000, description: 'Monto en centavos' })
@@ -20,15 +26,13 @@ export class CreatePaymentDto {
   @IsNotEmpty()
   cardToken: string;
 
-  @ApiProperty({ example: 'prod-uuid-123', description: 'ID del producto' })
-  @IsString()
+  @ApiProperty({
+    example: '550e8400-e29b-41d4-a716-446655440000',
+    description: 'ID del producto',
+  })
   @IsNotEmpty()
+  @IsUUID('4', { message: 'productId debe ser un UUID v4 valido' })
   productId: string;
-
-  @ApiProperty({ example: 'cust-uuid-456', description: 'ID del cliente' })
-  @IsString()
-  @IsNotEmpty()
-  customerId: string;
 
   @ApiProperty({ example: 'Juan Pérez' })
   @IsString()
