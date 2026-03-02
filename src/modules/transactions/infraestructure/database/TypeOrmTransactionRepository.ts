@@ -28,13 +28,15 @@ export class TypeOrmTransactionRepository implements TransactionRepositoryPort {
 
   async updateStatus(
     id: string,
-    status: 'APPROVED' | 'FAILED',
+    status: 'APPROVED' | 'FAILED' | 'PENDING',
     gatewayId?: string,
   ): Promise<void> {
     const transactionStatus =
       status === 'APPROVED'
         ? TransactionStatus.APPROVED
-        : TransactionStatus.FAILED;
+        : status === 'FAILED'
+          ? TransactionStatus.FAILED
+          : TransactionStatus.PENDING;
 
     await this.repo.update(id, {
       status: transactionStatus,
@@ -55,7 +57,8 @@ export class TypeOrmTransactionRepository implements TransactionRepositoryPort {
     return {
       id: tx.id,
       amount: tx.amount,
-      status: tx.status,
+      providerTransactionId: tx.providerTransactionId || '',
+      status: tx.status as 'APPROVED' | 'FAILED' | 'PENDING',
       product: { id: tx.product.id, name: tx.product.name },
       customer: {
         id: tx.customer.id,
