@@ -17,9 +17,7 @@ export class TypeOrmStockRepository implements StockRepositoryPort {
   }
 
   async findById(id: string) {
-    console.log(`Buscando producto con ID: ${id}`);
     const product = await this.productRepository.findOneBy({ id });
-    console.log(`Producto encontrado: ${product?.name || 'No encontrado'}`);
     return product;
   }
 
