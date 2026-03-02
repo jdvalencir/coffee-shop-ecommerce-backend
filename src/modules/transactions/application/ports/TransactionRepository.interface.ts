@@ -7,13 +7,14 @@ export interface TransactionRepositoryPort {
 
   updateStatus(
     id: string,
-    status: 'APPROVED' | 'FAILED',
+    status: 'PENDING' | 'APPROVED' | 'FAILED',
     gatewayId?: string,
   ): Promise<void>;
 
   findByIdWithDetails(id: string): Promise<{
     id: string;
     amount: number;
+    providerTransactionId: string;
     status: 'PENDING' | 'APPROVED' | 'FAILED';
     product: { id: string; name: string };
     customer: { id: string; name: string; email: string };

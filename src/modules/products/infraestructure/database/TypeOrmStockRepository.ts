@@ -13,11 +13,14 @@ export class TypeOrmStockRepository implements StockRepositoryPort {
   ) {}
 
   async findAllAvailable() {
-    return this.productRepository.find({ where: { stock: MoreThan(0) } });
+    return await this.productRepository.find({ where: { stock: MoreThan(0) } });
   }
 
   async findById(id: string) {
-    return this.productRepository.findOneBy({ id });
+    console.log(`Buscando producto con ID: ${id}`);
+    const product = await this.productRepository.findOneBy({ id });
+    console.log(`Producto encontrado: ${product?.name || 'No encontrado'}`);
+    return product;
   }
 
   async decreaseStock(productId: string, quantity: number) {
