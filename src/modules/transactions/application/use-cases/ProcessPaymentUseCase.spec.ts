@@ -6,7 +6,7 @@ import {
 
 describe('ProcessPaymentUseCase', () => {
   const dto: ProcessPaymentDto = {
-    amount: 263500,
+    amount: 26350000,
     cardToken: 'tok_test_123',
     productId: 'prod-1',
     fullName: 'Juan Perez',
@@ -103,7 +103,7 @@ describe('ProcessPaymentUseCase', () => {
       transactionId: 'tx-1',
     });
     expect(deps.paymentGateway.processPayment).toHaveBeenCalledWith({
-      amountInCents: 263500,
+      amountInCents: 26350000,
       customerEmail: dto.email,
       reference: 'tx-1',
       paymentMethodToken: dto.cardToken,

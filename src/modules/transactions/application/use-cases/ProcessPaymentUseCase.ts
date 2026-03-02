@@ -30,8 +30,9 @@ export interface ProcessPaymentDto {
   region: string;
 }
 
-const BASE_FEE_IN_CENTS = 1500;
-const DELIVERY_FEE_IN_CENTS = 12000;
+const BASE_FEE_IN_PESOS = 1500;
+const DELIVERY_FEE_IN_PESOS = 12000;
+const CENTS_PER_PESO = 100;
 
 @Injectable()
 export class ProcessPaymentUseCase {
@@ -60,10 +61,12 @@ export class ProcessPaymentUseCase {
       return Result.fail(new InvalidProductPriceError());
     }
 
-    const subtotal = product.price;
-    const total = subtotal + BASE_FEE_IN_CENTS + DELIVERY_FEE_IN_CENTS;
+    const subtotalInPesos = product.price;
+    const totalInPesos =
+      subtotalInPesos + BASE_FEE_IN_PESOS + DELIVERY_FEE_IN_PESOS;
+    const totalInCents = totalInPesos * CENTS_PER_PESO;
 
-    if (dto.amount !== total) {
+    if (dto.amount !== totalInCents) {
       return Result.fail(new InvalidTransactionAmountError());
     }
 
@@ -74,9 +77,9 @@ export class ProcessPaymentUseCase {
     });
 
     const pendingTx = await this.txRepo.createPending({
-      amount: total,
-      baseFee: BASE_FEE_IN_CENTS,
-      deliveryFee: DELIVERY_FEE_IN_CENTS,
+      amount: totalInPesos,
+      baseFee: BASE_FEE_IN_PESOS,
+      deliveryFee: DELIVERY_FEE_IN_PESOS,
       productId: dto.productId,
       customerId: customer.id,
     });
@@ -89,7 +92,7 @@ export class ProcessPaymentUseCase {
     });
 
     const request: PaymentRequest = {
-      amountInCents: total,
+      amountInCents: totalInCents,
       customerEmail: dto.email,
       reference: pendingTx.id,
       paymentMethodToken: dto.cardToken,
