@@ -6,7 +6,7 @@ import {
 
 describe('ProcessPaymentUseCase', () => {
   const dto: ProcessPaymentDto = {
-    amount: 250000,
+    amount: 263500,
     cardToken: 'tok_test_123',
     productId: 'prod-1',
     fullName: 'Juan Perez',
@@ -29,7 +29,10 @@ describe('ProcessPaymentUseCase', () => {
       createOrFind: jest.fn().mockResolvedValue({ id: 'cust-1' }),
     };
     const stockRepository = {
-      findById: jest.fn().mockResolvedValue({ id: 'prod-1', stock: 3 }),
+      findById: jest
+        .fn()
+        .mockResolvedValue({ id: 'prod-1', stock: 3, price: 250000 }),
+      decreaseStock: jest.fn().mockResolvedValue(undefined),
     };
     const deliveryRepository = {
       create: jest.fn().mockResolvedValue({ id: 'del-1' }),
@@ -87,7 +90,9 @@ describe('ProcessPaymentUseCase', () => {
       phone: dto.phone,
     });
     expect(deps.txRepo.createPending).toHaveBeenCalledWith({
-      amount: dto.amount,
+      amount: 263500,
+      baseFee: 1500,
+      deliveryFee: 12000,
       productId: dto.productId,
       customerId: 'cust-1',
     });
@@ -98,7 +103,7 @@ describe('ProcessPaymentUseCase', () => {
       transactionId: 'tx-1',
     });
     expect(deps.paymentGateway.processPayment).toHaveBeenCalledWith({
-      amountInCents: dto.amount,
+      amountInCents: 263500,
       customerEmail: dto.email,
       reference: 'tx-1',
       paymentMethodToken: dto.cardToken,
@@ -137,6 +142,7 @@ describe('ProcessPaymentUseCase', () => {
       'APPROVED',
       'provider-1',
     );
+    expect(deps.stockRepository.decreaseStock).toHaveBeenCalledWith('prod-1', 1);
     expect(result.isSuccess).toBe(true);
     expect(result.getValue()).toBe('tx-1');
   });
@@ -156,7 +162,22 @@ describe('ProcessPaymentUseCase', () => {
       'PENDING',
       'provider-2',
     );
+    expect(deps.stockRepository.decreaseStock).not.toHaveBeenCalled();
     expect(result.isSuccess).toBe(true);
     expect(result.getValue()).toBe('tx-1');
+  });
+
+  it('rejects the request when the frontend amount does not match the server calculation', async () => {
+    const deps = createDependencies();
+
+    const result = await deps.useCase.execute({
+      ...dto,
+      amount: 1000,
+    });
+
+    expect(result.isFailure).toBe(true);
+    expect(deps.customerRepository.createOrFind).not.toHaveBeenCalled();
+    expect(deps.txRepo.createPending).not.toHaveBeenCalled();
+    expect(deps.paymentGateway.processPayment).not.toHaveBeenCalled();
   });
 });

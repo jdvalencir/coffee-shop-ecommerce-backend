@@ -9,7 +9,9 @@ import {
 import type { CustomerRepositoryPort } from 'src/modules/customers/application/ports/CustomerRepository.interface';
 import type { DeliveryRepositoryPort } from 'src/modules/deliveries/application/ports/DeliveryRepository.interface';
 import type { StockRepositoryPort } from 'src/modules/products/application/ports/StockRepository.interface';
+import { InvalidProductPriceError } from 'src/modules/products/domain/errors/ProductsErrors';
 import { PaymentProviderError } from '../../domain/errors/TransactionErrors';
+import { InvalidTransactionAmountError } from '../../domain/errors/TransactionErrors';
 import type {
   PaymentGatewayPort,
   PaymentRequest,
@@ -27,6 +29,9 @@ export interface ProcessPaymentDto {
   city: string;
   region: string;
 }
+
+const BASE_FEE_IN_CENTS = 1500;
+const DELIVERY_FEE_IN_CENTS = 12000;
 
 @Injectable()
 export class ProcessPaymentUseCase {
@@ -51,6 +56,17 @@ export class ProcessPaymentUseCase {
       );
     }
 
+    if (product.price <= 0) {
+      return Result.fail(new InvalidProductPriceError());
+    }
+
+    const subtotal = product.price;
+    const total = subtotal + BASE_FEE_IN_CENTS + DELIVERY_FEE_IN_CENTS;
+
+    if (dto.amount !== total) {
+      return Result.fail(new InvalidTransactionAmountError());
+    }
+
     const customer = await this.customerRepository.createOrFind({
       fullName: dto.fullName,
       email: dto.email,
@@ -58,7 +74,9 @@ export class ProcessPaymentUseCase {
     });
 
     const pendingTx = await this.txRepo.createPending({
-      amount: dto.amount,
+      amount: total,
+      baseFee: BASE_FEE_IN_CENTS,
+      deliveryFee: DELIVERY_FEE_IN_CENTS,
       productId: dto.productId,
       customerId: customer.id,
     });
@@ -71,7 +89,7 @@ export class ProcessPaymentUseCase {
     });
 
     const request: PaymentRequest = {
-      amountInCents: dto.amount,
+      amountInCents: total,
       customerEmail: dto.email,
       reference: pendingTx.id,
       paymentMethodToken: dto.cardToken,
@@ -88,11 +106,18 @@ export class ProcessPaymentUseCase {
       );
     }
 
+    const nextStatus = response.status === 'APPROVED' ? 'APPROVED' : 'PENDING';
+
     await this.txRepo.updateStatus(
       pendingTx.id,
-      response.status === 'APPROVED' ? 'APPROVED' : 'PENDING',
+      nextStatus,
       response.providerTransactionId,
     );
+
+    if (nextStatus === 'APPROVED') {
+      await this.stockRepository.decreaseStock(dto.productId, 1);
+    }
+
     return Result.ok(pendingTx.id);
   }
 }
