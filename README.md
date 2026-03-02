@@ -2,9 +2,7 @@
 
 Backend del e-commerce de Origen Coffee construido con NestJS, TypeORM y PostgreSQL. La API expone el catalogo publico de productos, procesa pagos con Wompi, registra clientes, crea entregas y genera el recibo de cada transaccion.
 
-> Espacio para imagen principal del proyecto
->
-> Sugerencia: logo, captura de Swagger o diagrama general de la plataforma.
+<img width="1912" height="943" alt="image" src="https://github.com/user-attachments/assets/baca219b-26b0-4004-a8e8-df394ba2ccb2" />
 
 ## Tabla de contenido
 
@@ -57,10 +55,11 @@ Backend del e-commerce de Origen Coffee construido con NestJS, TypeORM y Postgre
 
 ## Swagger
 
+- https://api-coffee-shop.jdvalencir.com/docs#/
+
 La documentacion OpenAPI se genera automaticamente al iniciar la aplicacion y queda publicada en:
 
-- `http://localhost:3001/docs` si usas el `.env.example`
-- `http://localhost:3000/docs` si corres sin variable `PORT`
+- `http://localhost:3000/docs`
 
 Configuracion actual:
 
@@ -68,9 +67,7 @@ Configuracion actual:
 - Version: `1.0`
 - Ruta de montaje: `/docs`
 
-> Espacio para imagen de Swagger
->
-> Sugerencia: captura de la UI con los endpoints `products` y `transactions`.
+<img width="1898" height="936" alt="image" src="https://github.com/user-attachments/assets/17bfc9cd-80fb-4269-a227-07f143556060" />
 
 ### Payload de checkout esperado
 
@@ -87,10 +84,6 @@ El endpoint `POST /transactions` recibe:
 - `region`
 
 ## Diagrama relacional
-
-> Espacio para imagen del modelo relacional
->
-> Sugerencia: exportar este diagrama como PNG y dejarlo en `docs/images/relational-diagram.png`.
 
 ```mermaid
 erDiagram
@@ -158,10 +151,6 @@ El proyecto sigue una separacion por modulos de negocio con una estructura cerca
 - `infraestructure`: controllers, adapters externos, repositorios TypeORM, entidades y DTOs.
 - `core`: tokens de inyeccion, errores compartidos, filtros HTTP y utilidades.
 
-> Espacio para imagen de arquitectura
->
-> Sugerencia: diagrama por capas o screenshot del arbol de carpetas.
-
 ```mermaid
 flowchart LR
     Client[Cliente / Frontend]
@@ -217,18 +206,7 @@ El proyecto define umbral minimo global de `80%` para:
 - functions
 - lines
 
-### Cobertura por modulo (vista general)
-
-| Area | Statements | Branches | Functions | Lines |
-| --- | --- | --- | --- | --- |
-| `modules/products` | `100%` | `100%` | `100%` | `100%` |
-| `modules/transactions` | `100%` | `100%` | `100%` | `100%` |
-| `modules/customers` | `100%` | `100%` | `100%` | `100%` |
-| `modules/deliveries` | `100%` | `100%` | `100%` | `100%` |
-
-> Espacio para imagen del reporte de cobertura
->
-> Sugerencia: captura de `coverage/lcov-report/index.html`.
+<img width="888" height="885" alt="image" src="https://github.com/user-attachments/assets/9eea10b0-5444-4d34-9d05-e5b99630a219" />
 
 ## Como correr la app
 
@@ -382,9 +360,7 @@ Solo corre si `verify` termina bien.
 - El seeder no duplica productos si ya existe informacion en `products`.
 - El despliegue espera estabilidad del servicio (`wait-for-service-stability: true`).
 
-> Espacio para imagen del pipeline
->
-> Sugerencia: captura del workflow en GitHub Actions mostrando `verify` y `deploy`.
+<img width="1892" height="840" alt="image" src="https://github.com/user-attachments/assets/981954f7-9549-4f3c-b81f-604bf485706b" />
 
 ## Estructura base del proyecto
 
