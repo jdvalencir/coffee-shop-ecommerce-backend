@@ -188,6 +188,11 @@ flowchart LR
 8. Actualiza el estado de la transaccion.
 9. Si el pago fue aprobado, descuenta stock.
 
+### Diagrama de despliegue
+
+<img width="1629" height="952" alt="Diagrama sin título drawio" src="https://github.com/user-attachments/assets/2fe6834e-e68a-49e0-8362-53534f43eaa7" />
+
+
 ## Coverage
 
 Reporte local tomado de `coverage/lcov-report/index.html`.
