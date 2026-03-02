@@ -43,7 +43,12 @@ jest.mock('@nestjs/swagger', () => {
     },
     ApiParam: () => () => undefined,
     ApiProperty: () => () => undefined,
+    ApiBody: () => () => undefined,
+    ApiOperation: () => () => undefined,
+    ApiBadRequestResponse: () => () => undefined,
+    ApiConflictResponse: () => () => undefined,
     ApiCreatedResponse: () => () => undefined,
+    ApiNotFoundResponse: () => () => undefined,
     ApiOkResponse: () => () => undefined,
     ApiTags: () => () => undefined,
   };
