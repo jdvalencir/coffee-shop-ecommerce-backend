@@ -97,6 +97,42 @@ $ mau deploy
 
 With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
 
+### GitHub Actions pipeline for AWS ECS
+
+This repository now includes:
+
+- a production-ready `Dockerfile`
+- a `.dockerignore` to keep the image lean
+- a workflow at `.github/workflows/deploy-aws.yml`
+
+The workflow does this on every push to `main` (and can also be run manually):
+
+1. installs dependencies
+2. builds the NestJS app
+3. builds a Docker image
+4. pushes the image to Amazon ECR
+5. updates the current ECS service with the new image
+
+Required GitHub repository variables:
+
+- `AWS_REGION`
+- `ECR_REPOSITORY`
+- `ECS_CLUSTER`
+- `ECS_SERVICE`
+- `ECS_CONTAINER_NAME`
+
+Required GitHub repository secret:
+
+- `AWS_ROLE_TO_ASSUME`
+
+`AWS_ROLE_TO_ASSUME` should be an IAM role configured for GitHub OIDC with permission to:
+
+- push images to ECR
+- describe/register ECS task definitions
+- update the target ECS service
+
+The workflow reuses the currently active ECS task definition and only swaps the container image, so your existing CPU, memory, networking, env vars and secrets stay managed in ECS.
+
 ## Resources
 
 Check out a few resources that may come in handy when working with NestJS:
