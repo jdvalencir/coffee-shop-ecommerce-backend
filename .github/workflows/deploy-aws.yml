@@ -16,7 +16,6 @@ env:
 jobs:
   verify:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -52,8 +51,9 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -70,6 +70,33 @@ jobs:
           docker push "$IMAGE_URI"
           echo "image=$IMAGE_URI" >> "$GITHUB_OUTPUT"
 
+      - name: Run Database Migrations & Seeders
+        env:
+          IMAGE_URI: ${{ steps.build-image.outputs.image }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+        run: |
+          # 1. Corremos las migraciones apuntando a los archivos compilados (.js)
+          docker run --rm \
+            -e DB_HOST="$DB_HOST" \
+            -e DB_PORT="$DB_PORT" \
+            -e DB_USER="$DB_USER" \
+            -e DB_PASSWORD="$DB_PASSWORD" \
+            -e DB_NAME="$DB_NAME" \
+            "$IMAGE_URI" pnpm run migration:run:prod
+            
+          # 2. Corremos el seeder compilado
+          docker run --rm \
+            -e DB_HOST="$DB_HOST" \
+            -e DB_PORT="$DB_PORT" \
+            -e DB_USER="$DB_USER" \
+            -e DB_PASSWORD="$DB_PASSWORD" \
+            -e DB_NAME="$DB_NAME" \
+            "$IMAGE_URI" pnpm run seed:run:prod
+      # -------------------------------------------------------------
       - name: Get current task definition
         run: |
           TASK_DEFINITION_ARN="$(aws ecs describe-services \

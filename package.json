@@ -23,7 +23,9 @@
     "migration:run": "TS_NODE_PROJECT=tsconfig.typeorm.json typeorm-ts-node-commonjs -d src/database/config/data-source.ts migration:run",
     "migration:revert": "TS_NODE_PROJECT=tsconfig.typeorm.json typeorm-ts-node-commonjs -d src/database/config/data-source.ts migration:revert",
     "migration:generate": "TS_NODE_PROJECT=tsconfig.typeorm.json typeorm-ts-node-commonjs -d src/database/config/data-source.ts migration:generate",
-    "seed:run": "TS_NODE_PROJECT=tsconfig.typeorm.json ts-node -r tsconfig-paths/register src/database/seeds/product.seed.ts"
+    "seed:run": "TS_NODE_PROJECT=tsconfig.typeorm.json ts-node -r tsconfig-paths/register src/database/seeds/product.seed.ts",
+    "migration:run:prod": "typeorm -d dist/database/config/data-source.js migration:run",
+    "seed:run:prod": "node dist/database/seeds/product.seed.js"
   },
   "dependencies": {
     "@nestjs/axios": "^4.0.1",
