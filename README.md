@@ -47,14 +47,41 @@ $ pnpm run start:prod
 ## Run tests
 
 ```bash
-# unit tests
+# unit tests (all *.spec.ts inside src/)
 $ pnpm run test
 
-# e2e tests
-$ pnpm run test:e2e
+# unit tests in serial
+$ pnpm run test:unit
 
-# test coverage
+# unit tests with coverage
 $ pnpm run test:cov
+
+# e2e tests (files inside test/)
+$ pnpm run test:e2e
+```
+
+### Test structure
+
+- `src/**/*.spec.ts`: unit and integration-style tests colocados junto al código que verifican.
+- `test/**/*.e2e-spec.ts`: end-to-end tests with the separate config in `test/jest-e2e.json`.
+- `package.json` uses `rootDir: "src"` for the main Jest config, so anything under `src/` ending in `.spec.ts` is picked up by `pnpm run test`.
+- Coverage excludes specs, seeds, migrations, DTOs and entities so the report reflects the runtime application code more closely.
+
+### Important note about `pnpm`
+
+With Jest 30, this command is problematic:
+
+```bash
+$ pnpm test -- --coverage --runInBand
+```
+
+That extra `--` reaches Jest, and Jest treats everything after it as a filename pattern instead of CLI flags.
+
+Use one of these instead:
+
+```bash
+$ pnpm run test:cov
+$ pnpm run test:unit
 ```
 
 ## Deployment
