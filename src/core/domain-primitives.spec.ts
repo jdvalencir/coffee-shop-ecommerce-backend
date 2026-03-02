@@ -77,6 +77,7 @@ describe('Domain error HTTP mapping', () => {
   it('maps known domain errors to HTTP statuses', () => {
     expect(DOMAIN_ERROR_STATUS_MAP).toEqual({
       INSUFFICIENT_STOCK: HttpStatus.CONFLICT,
+      INVALID_TRANSACTION_AMOUNT: HttpStatus.BAD_REQUEST,
       PAYMENT_REJECTED: HttpStatus.BAD_REQUEST,
       PRODUCT_NOT_FOUND: HttpStatus.NOT_FOUND,
     });
