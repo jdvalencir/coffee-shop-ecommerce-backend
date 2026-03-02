@@ -30,8 +30,13 @@ describe('TransactionResponseDto', () => {
 
     const receipt = new TransactionReceiptDto();
     receipt.transactionId = 'tx-1';
-    receipt.amount = 250000;
+    receipt.subtotal = 250000;
+    receipt.baseFee = 1500;
+    receipt.deliveryFee = 12000;
+    receipt.total = 263500;
+    receipt.amount = 263500;
     receipt.status = 'APPROVED';
+    receipt.createdAt = new Date('2026-03-02T14:30:00.000Z');
     receipt.product = product;
     receipt.customer = customer;
     receipt.delivery = delivery;

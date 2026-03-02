@@ -1,4 +1,3 @@
-import { Delivery } from 'src/modules/deliveries/infraestructure/entities/Delivery.entity';
 import {
   Column,
   CreateDateColumn,
@@ -9,6 +8,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Customer } from '../../../customers/infraestructure/entities/Customer.entity';
+import { Delivery } from '../../../deliveries/infraestructure/entities/Delivery.entity';
 import { Product } from '../../../products/infraestructure/entities/Product.entity';
 
 export enum TransactionStatus {

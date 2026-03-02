@@ -48,11 +48,29 @@ export class TransactionReceiptDto {
   })
   transactionId: string;
 
+  @ApiProperty({ example: 25000000, description: 'Subtotal del producto' })
+  subtotal: number;
+
+  @ApiProperty({ example: 1500, description: 'Tarifa base aplicada' })
+  baseFee: number;
+
+  @ApiProperty({ example: 12000, description: 'Costo de envio aplicado' })
+  deliveryFee: number;
+
+  @ApiProperty({ example: 25013500, description: 'Total calculado por backend' })
+  total: number;
+
   @ApiProperty({ example: 25000000, description: 'Monto registrado' })
   amount: number;
 
   @ApiProperty({ example: 'APPROVED', enum: ['PENDING', 'APPROVED', 'FAILED'] })
   status: 'PENDING' | 'APPROVED' | 'FAILED';
+
+  @ApiProperty({
+    example: '2026-03-02T14:30:00.000Z',
+    description: 'Fecha de creacion de la transaccion',
+  })
+  createdAt: Date;
 
   @ApiProperty({ type: () => TransactionReceiptProductDto })
   product: TransactionReceiptProductDto;

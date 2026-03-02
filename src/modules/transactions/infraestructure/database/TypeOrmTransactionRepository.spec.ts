@@ -10,7 +10,9 @@ describe('TypeOrmTransactionRepository', () => {
     const createdTransaction = { id: 'tx-created' };
     const txEntity = {
       id: 'tx-created',
-      amount: 250000,
+      amount: 263500,
+      baseFee: 1500,
+      deliveryFee: 12000,
       status: TransactionStatus.PENDING,
       product: { id: 'prod-1', name: 'Cafe' },
       customer: {
@@ -24,6 +26,7 @@ describe('TypeOrmTransactionRepository', () => {
         region: 'Cundinamarca',
       },
       providerTransactionId: 'provider-1',
+      createdAt: new Date('2026-03-02T14:30:00.000Z'),
     } as Transaction;
     const repo = {
       create: jest.fn().mockReturnValue(createdTransaction),
@@ -38,14 +41,18 @@ describe('TypeOrmTransactionRepository', () => {
 
     await expect(
       repository.createPending({
-        amount: 250000,
+        amount: 263500,
+        baseFee: 1500,
+        deliveryFee: 12000,
         productId: 'prod-1',
         customerId: 'cust-1',
       }),
     ).resolves.toEqual({ id: 'tx-created' });
 
     expect(repo.create).toHaveBeenCalledWith({
-      amount: 250000,
+      amount: 263500,
+      baseFee: 1500,
+      deliveryFee: 12000,
       status: TransactionStatus.PENDING,
       product: { id: 'prod-1' },
       customer: { id: 'cust-1' },
@@ -61,19 +68,20 @@ describe('TypeOrmTransactionRepository', () => {
     });
     expect(repo.update).toHaveBeenNthCalledWith(2, 'tx-1', {
       status: TransactionStatus.FAILED,
-      providerTransactionId: undefined,
     });
     expect(repo.update).toHaveBeenNthCalledWith(3, 'tx-1', {
       status: TransactionStatus.PENDING,
-      providerTransactionId: undefined,
     });
 
     await expect(repository.findByIdWithDetails('tx-created')).resolves.toEqual(
       {
         id: 'tx-created',
-        amount: 250000,
+        amount: 263500,
+        baseFee: 1500,
+        deliveryFee: 12000,
         providerTransactionId: 'provider-1',
         status: 'PENDING',
+        createdAt: txEntity.createdAt,
         product: { id: 'prod-1', name: 'Cafe' },
         customer: {
           id: 'cust-1',
@@ -103,6 +111,8 @@ describe('TypeOrmTransactionRepository', () => {
       findOne: jest.fn().mockResolvedValue({
         id: 'tx-nullable',
         amount: 180000,
+        baseFee: 1500,
+        deliveryFee: 12000,
         status: TransactionStatus.APPROVED,
         product: { id: 'prod-2', name: 'Espresso' },
         customer: {
@@ -112,6 +122,7 @@ describe('TypeOrmTransactionRepository', () => {
         },
         delivery: null,
         providerTransactionId: null,
+        createdAt: new Date('2026-03-02T14:30:00.000Z'),
       } as Transaction),
     };
     const repository = new TypeOrmTransactionRepository(repo as never);
@@ -121,8 +132,11 @@ describe('TypeOrmTransactionRepository', () => {
     ).resolves.toEqual({
       id: 'tx-nullable',
       amount: 180000,
+      baseFee: 1500,
+      deliveryFee: 12000,
       providerTransactionId: '',
       status: 'APPROVED',
+      createdAt: new Date('2026-03-02T14:30:00.000Z'),
       product: { id: 'prod-2', name: 'Espresso' },
       customer: {
         id: 'cust-2',
