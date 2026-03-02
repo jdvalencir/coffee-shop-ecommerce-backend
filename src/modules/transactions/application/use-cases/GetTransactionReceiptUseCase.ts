@@ -23,18 +23,17 @@ export class GetTransactionReceiptUseCase {
       return Result.fail(new TransactionNotFoundError(transactionId));
     }
 
+    let currentStatus = txDetails.status;
+
     if (txDetails.status === 'PENDING' && txDetails.providerTransactionId) {
       const realStatus = await this.paymentGateway.checkStatus(
         txDetails.providerTransactionId,
       );
 
-      console.log('Real status from gateway:', realStatus);
-
       if (realStatus.status !== 'PENDING') {
-        await this.txRepo.updateStatus(
-          transactionId,
-          realStatus.status === 'APPROVED' ? 'APPROVED' : 'FAILED',
-        );
+        currentStatus =
+          realStatus.status === 'APPROVED' ? 'APPROVED' : 'FAILED';
+        await this.txRepo.updateStatus(transactionId, currentStatus);
       }
 
       if (realStatus.status === 'APPROVED') {
@@ -44,8 +43,13 @@ export class GetTransactionReceiptUseCase {
 
     const receipt = {
       transactionId: txDetails.id,
+      subtotal: txDetails.amount - txDetails.baseFee - txDetails.deliveryFee,
+      baseFee: txDetails.baseFee,
+      deliveryFee: txDetails.deliveryFee,
+      total: txDetails.amount,
       amount: txDetails.amount,
-      status: txDetails.status,
+      status: currentStatus,
+      createdAt: txDetails.createdAt,
       product: txDetails.product,
       customer: txDetails.customer,
       delivery: txDetails.delivery,
