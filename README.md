@@ -1,81 +1,81 @@
 # Coffee Shop E-commerce Backend
 
-Backend del e-commerce de Origen Coffee construido con NestJS, TypeORM y PostgreSQL. La API expone el catalogo publico de productos, procesa pagos con Wompi, registra clientes, crea entregas y genera el recibo de cada transaccion.
+Backend for the Origen Coffee e-commerce, built with NestJS, TypeORM and PostgreSQL. The API exposes the public product catalog, processes payments with Wompi, registers customers, creates deliveries and generates the receipt for each transaction.
 
 <img width="1912" height="943" alt="image" src="https://github.com/user-attachments/assets/baca219b-26b0-4004-a8e8-df394ba2ccb2" />
 
-## Tabla de contenido
+## Table of contents
 
-- [Resumen](#resumen)
+- [Overview](#overview)
 - [Swagger](#swagger)
-- [Diagrama relacional](#diagrama-relacional)
-- [Arquitectura](#arquitectura)
+- [Relational diagram](#relational-diagram)
+- [Architecture](#architecture)
 - [Coverage](#coverage)
-- [Como correr la app](#como-correr-la-app)
+- [Running the app](#running-the-app)
 - [GitHub Actions](#github-actions)
 
-## Resumen
+## Overview
 
-### Que hace esta API
+### What this API does
 
-- Lista productos disponibles para compra.
-- Consulta el detalle de un producto por `id`.
-- Procesa pagos contra Wompi validando el total calculado por backend.
-- Crea o reutiliza clientes en cada checkout.
-- Registra la entrega asociada a la transaccion.
-- Permite consultar el recibo de una compra.
+- Lists products available for purchase.
+- Retrieves the detail of a product by `id`.
+- Processes payments against Wompi, validating the total calculated by the backend.
+- Creates or reuses customers on each checkout.
+- Registers the delivery associated with the transaction.
+- Allows retrieving the receipt of a purchase.
 
-### Reglas de negocio relevantes
+### Relevant business rules
 
-- El backend no confia en el total enviado por frontend: recalcula el valor a cobrar.
-- El total se compone de:
-  `precio del producto + 1.500 COP (base fee) + 12.000 COP (delivery fee)`.
-- El valor que se envia al proveedor se valida en centavos.
-- Si el pago queda `APPROVED`, se descuenta stock.
-- Si el proveedor rechaza la compra, la transaccion se marca como `FAILED`.
+- The backend does not trust the total sent by the frontend: it recalculates the amount to charge.
+- The total is made up of:
+  `product price + 1,500 COP (base fee) + 12,000 COP (delivery fee)`.
+- The amount sent to the provider is validated in cents.
+- If the payment ends up `APPROVED`, stock is decremented.
+- If the provider rejects the purchase, the transaction is marked as `FAILED`.
 
-### Stack principal
+### Main stack
 
 - NestJS 11
 - TypeORM 0.3
 - PostgreSQL
 - Swagger (`@nestjs/swagger`)
-- Jest para pruebas y cobertura
-- GitHub Actions para CI/CD
-- Docker + Amazon ECR/ECS para despliegue
+- Jest for tests and coverage
+- GitHub Actions for CI/CD
+- Docker + Amazon ECR/ECS for deployment
 
-### Endpoints principales
+### Main endpoints
 
-| Metodo | Ruta | Descripcion |
+| Method | Route | Description |
 | --- | --- | --- |
-| `GET` | `/products` | Lista catalogo publico con productos disponibles |
-| `GET` | `/products/:id` | Retorna la ficha completa de un producto |
-| `POST` | `/transactions` | Procesa el checkout y crea la transaccion |
-| `GET` | `/transactions/:id` | Consulta el recibo de una transaccion |
+| `GET` | `/products` | Lists the public catalog with available products |
+| `GET` | `/products/:id` | Returns the full detail of a product |
+| `POST` | `/transactions` | Processes the checkout and creates the transaction |
+| `GET` | `/transactions/:id` | Retrieves the receipt of a transaction |
 
 ## Swagger
 
 - https://api-coffee-shop.jdvalencir.com/docs#/
 
-La documentacion OpenAPI se genera automaticamente al iniciar la aplicacion y queda publicada en:
+The OpenAPI documentation is generated automatically when the application starts and is served at:
 
 - `http://localhost:3000/docs`
 
-Configuracion actual:
+Current configuration:
 
-- Titulo: `Origen Coffee E-commerce API`
+- Title: `Origen Coffee E-commerce API`
 - Version: `1.0`
-- Ruta de montaje: `/docs`
+- Mount path: `/docs`
 
 <img width="1898" height="936" alt="image" src="https://github.com/user-attachments/assets/17bfc9cd-80fb-4269-a227-07f143556060" />
 
-### Payload de checkout esperado
+### Expected checkout payload
 
-El endpoint `POST /transactions` recibe:
+The `POST /transactions` endpoint receives:
 
-- `amount`: monto en centavos
-- `cardToken`: token de tarjeta emitido por Wompi
-- `productId`: UUID del producto
+- `amount`: amount in cents
+- `cardToken`: card token issued by Wompi
+- `productId`: product UUID
 - `fullName`
 - `email`
 - `phone`
@@ -83,7 +83,7 @@ El endpoint `POST /transactions` recibe:
 - `city`
 - `region`
 
-## Diagrama relacional
+## Relational diagram
 
 ```mermaid
 erDiagram
@@ -135,26 +135,26 @@ erDiagram
     TRANSACTIONS ||--o| DELIVERIES : ships_to
 ```
 
-### Relaciones clave
+### Key relationships
 
-- Un producto puede estar asociado a muchas transacciones.
-- Un cliente puede realizar muchas transacciones.
-- Una transaccion puede tener una entrega asociada.
-- `deliveries.transaction_id` es `UNIQUE`, por lo que la relacion con `transactions` es uno a uno.
+- A product can be associated with many transactions.
+- A customer can make many transactions.
+- A transaction can have one associated delivery.
+- `deliveries.transaction_id` is `UNIQUE`, so the relationship with `transactions` is one-to-one.
 
-## Arquitectura
+## Architecture
 
-El proyecto sigue una separacion por modulos de negocio con una estructura cercana a arquitectura hexagonal / clean architecture:
+The project is split into business modules with a structure close to hexagonal / clean architecture:
 
-- `application`: casos de uso y contratos (ports).
-- `domain`: errores y reglas de dominio.
-- `infraestructure`: controllers, adapters externos, repositorios TypeORM, entidades y DTOs.
-- `core`: tokens de inyeccion, errores compartidos, filtros HTTP y utilidades.
+- `application`: use cases and contracts (ports).
+- `domain`: errors and domain rules.
+- `infraestructure`: controllers, external adapters, TypeORM repositories, entities and DTOs.
+- `core`: injection tokens, shared errors, HTTP filters and utilities.
 
 ```mermaid
 flowchart LR
-    Client[Cliente / Frontend]
-    Controllers[Controllers REST]
+    Client[Client / Frontend]
+    Controllers[REST Controllers]
     UseCases[Application Use Cases]
     Ports[Ports / Interfaces]
     Repos[TypeORM Repositories]
@@ -169,42 +169,42 @@ flowchart LR
     UseCases --> Wompi
 ```
 
-### Modulos
+### Modules
 
-- `StockModule`: consulta de catalogo y detalle de productos.
-- `CustomersModule`: persistencia y busqueda/creacion de clientes.
-- `DeliveriesModule`: persistencia de la informacion de entrega.
-- `TransactionsModule`: checkout, integracion con Wompi y recibos.
+- `StockModule`: catalog and product detail queries.
+- `CustomersModule`: persistence and lookup/creation of customers.
+- `DeliveriesModule`: persistence of delivery information.
+- `TransactionsModule`: checkout, Wompi integration and receipts.
 
-### Flujo de pago
+### Payment flow
 
-1. El controller recibe el checkout.
-2. El caso de uso valida el producto y su stock.
-3. Recalcula el total a pagar desde backend.
-4. Crea o reutiliza el cliente.
-5. Registra una transaccion `PENDING`.
-6. Crea la entrega asociada.
-7. Llama a Wompi mediante `WompiApiAdapter`.
-8. Actualiza el estado de la transaccion.
-9. Si el pago fue aprobado, descuenta stock.
+1. The controller receives the checkout.
+2. The use case validates the product and its stock.
+3. It recalculates the total to pay on the backend.
+4. It creates or reuses the customer.
+5. It registers a `PENDING` transaction.
+6. It creates the associated delivery.
+7. It calls Wompi through `WompiApiAdapter`.
+8. It updates the transaction status.
+9. If the payment was approved, it decrements stock.
 
-### Diagrama de despliegue
+### Deployment diagram
 
 <img width="1629" height="952" alt="Diagrama sin título drawio" src="https://github.com/user-attachments/assets/2fe6834e-e68a-49e0-8362-53534f43eaa7" />
 
 
 ## Coverage
 
-Reporte local tomado de `coverage/lcov-report/index.html`.
+Local report taken from `coverage/lcov-report/index.html`.
 
-| Metrica | Resultado | Cobertura |
+| Metric | Result | Coverage |
 | --- | --- | --- |
 | Statements | `356/358` | `99.44%` |
 | Branches | `108/131` | `82.44%` |
 | Functions | `50/51` | `98.03%` |
 | Lines | `322/324` | `99.38%` |
 
-El proyecto define umbral minimo global de `80%` para:
+The project defines a global minimum threshold of `80%` for:
 
 - statements
 - branches
@@ -213,67 +213,67 @@ El proyecto define umbral minimo global de `80%` para:
 
 <img width="888" height="885" alt="image" src="https://github.com/user-attachments/assets/9eea10b0-5444-4d34-9d05-e5b99630a219" />
 
-## Como correr la app
+## Running the app
 
-### Prerrequisitos
+### Prerequisites
 
-- Node.js 22 recomendado
+- Node.js 22 recommended
 - pnpm 10
 - PostgreSQL
 
-### Variables de entorno
+### Environment variables
 
-Puedes partir de `.env.example`:
+You can start from `.env.example`:
 
 ```bash
 cp .env.example .env
 ```
 
-Variables usadas por la aplicacion:
+Variables used by the application:
 
-| Variable | Descripcion | Valor por defecto / ejemplo |
+| Variable | Description | Default / example |
 | --- | --- | --- |
-| `DB_HOST` | Host de PostgreSQL | `localhost` |
-| `DB_PORT` | Puerto de PostgreSQL | `5433` en `.env.example` |
-| `DB_USER` | Usuario de BD | `postgres` |
-| `DB_PASSWORD` | Password de BD | `postgres` |
-| `DB_NAME` | Nombre de BD | `coffee_shop` |
-| `PORT` | Puerto HTTP de la API | `3001` en `.env.example` |
-| `NODE_ENV` | Entorno de ejecucion | `development` |
-| `WOMPI_API_URL` | URL base de Wompi | sandbox |
-| `WOMPI_PUBLIC_KEY` | Llave publica Wompi | ejemplo |
-| `WOMPI_PRIVATE_KEY` | Llave privada Wompi | ejemplo |
-| `WOMPI_INTEGRITY_KEY` | Llave de integridad Wompi | ejemplo |
+| `DB_HOST` | PostgreSQL host | `localhost` |
+| `DB_PORT` | PostgreSQL port | `5433` in `.env.example` |
+| `DB_USER` | DB user | `postgres` |
+| `DB_PASSWORD` | DB password | `postgres` |
+| `DB_NAME` | DB name | `coffee_shop` |
+| `PORT` | API HTTP port | `3001` in `.env.example` |
+| `NODE_ENV` | Runtime environment | `development` |
+| `WOMPI_API_URL` | Wompi base URL | sandbox |
+| `WOMPI_PUBLIC_KEY` | Wompi public key | example |
+| `WOMPI_PRIVATE_KEY` | Wompi private key | example |
+| `WOMPI_INTEGRITY_KEY` | Wompi integrity key | example |
 
-### Instalacion
+### Installation
 
 ```bash
 pnpm install
 ```
 
-### Inicializar base de datos
+### Initialize the database
 
-Corre migraciones:
+Run migrations:
 
 ```bash
 pnpm run migration:run
 ```
 
-Carga el catalogo inicial:
+Load the initial catalog:
 
 ```bash
 pnpm run seed:run
 ```
 
-El seeder inserta productos solo si la tabla `products` esta vacia.
+The seeder inserts products only if the `products` table is empty.
 
-### Ejecutar en desarrollo
+### Run in development
 
 ```bash
 pnpm run start:dev
 ```
 
-Otras variantes:
+Other variants:
 
 ```bash
 pnpm run start
@@ -282,7 +282,7 @@ pnpm run build
 pnpm run start:prod
 ```
 
-### Ejecutar pruebas
+### Run tests
 
 ```bash
 pnpm run test
@@ -291,54 +291,54 @@ pnpm run test:cov
 pnpm run test:e2e
 ```
 
-### Orden recomendado para levantar el proyecto
+### Recommended order to bring the project up
 
-1. Configurar `.env`.
-2. Levantar PostgreSQL.
-3. Ejecutar `pnpm install`.
-4. Ejecutar `pnpm run migration:run`.
-5. Ejecutar `pnpm run seed:run`.
-6. Ejecutar `pnpm run start:dev`.
-7. Abrir `http://localhost:3001/docs`.
+1. Configure `.env`.
+2. Start PostgreSQL.
+3. Run `pnpm install`.
+4. Run `pnpm run migration:run`.
+5. Run `pnpm run seed:run`.
+6. Run `pnpm run start:dev`.
+7. Open `http://localhost:3001/docs`.
 
 ## GitHub Actions
 
-El flujo de CI/CD esta definido en `.github/workflows/deploy-aws.yml`.
+The CI/CD workflow is defined in `.github/workflows/deploy-aws.yml`.
 
-### Cuando se ejecuta
+### When it runs
 
-- En cada `push` a la rama `main`.
-- Manualmente desde GitHub con `workflow_dispatch`.
+- On every `push` to the `main` branch.
+- Manually from GitHub with `workflow_dispatch`.
 
-### Estructura del pipeline
+### Pipeline structure
 
 #### Job `verify`
 
-Este job valida que el proyecto este sano antes de desplegar:
+This job checks that the project is healthy before deploying:
 
-1. Hace checkout del repositorio.
-2. Configura `pnpm` 10.
-3. Configura Node.js 22.
-4. Ejecuta `pnpm install --frozen-lockfile`.
-5. Ejecuta `pnpm run build`.
-6. Ejecuta `pnpm run test:unit:cov`.
+1. Checks out the repository.
+2. Sets up `pnpm` 10.
+3. Sets up Node.js 22.
+4. Runs `pnpm install --frozen-lockfile`.
+5. Runs `pnpm run build`.
+6. Runs `pnpm run test:unit:cov`.
 
 #### Job `deploy`
 
-Solo corre si `verify` termina bien.
+Runs only if `verify` succeeds.
 
-1. Hace checkout del repositorio.
-2. Configura credenciales de AWS.
-3. Hace login en Amazon ECR.
-4. Construye la imagen Docker usando el `Dockerfile`.
-5. Publica la imagen en ECR con tag igual al SHA del commit.
-6. Ejecuta migraciones dentro del contenedor con `pnpm run migration:run:prod`.
-7. Ejecuta el seeder compilado con `pnpm run seed:run:prod`.
-8. Descarga la task definition actual (`coffee-shop-api-task`).
-9. Reemplaza la imagen del contenedor objetivo.
-10. Despliega la nueva revision en Amazon ECS.
+1. Checks out the repository.
+2. Configures AWS credentials.
+3. Logs in to Amazon ECR.
+4. Builds the Docker image using the `Dockerfile`.
+5. Pushes the image to ECR, tagged with the commit SHA.
+6. Runs migrations inside the container with `pnpm run migration:run:prod`.
+7. Runs the compiled seeder with `pnpm run seed:run:prod`.
+8. Downloads the current task definition (`coffee-shop-api-task`).
+9. Replaces the image of the target container.
+10. Deploys the new revision to Amazon ECS.
 
-### Variables y secrets requeridos
+### Required variables and secrets
 
 #### Repository variables
 
@@ -358,16 +358,16 @@ Solo corre si `verify` termina bien.
 - `DB_PASSWORD`
 - `DB_NAME`
 
-### Consideraciones importantes del workflow
+### Important workflow considerations
 
-- El nombre de la task definition consultada esta hardcodeado como `coffee-shop-api-task`.
-- Las migraciones y seeders se ejecutan en cada despliegue.
-- El seeder no duplica productos si ya existe informacion en `products`.
-- El despliegue espera estabilidad del servicio (`wait-for-service-stability: true`).
+- The name of the queried task definition is hardcoded as `coffee-shop-api-task`.
+- Migrations and seeders run on every deployment.
+- The seeder does not duplicate products if data already exists in `products`.
+- The deployment waits for service stability (`wait-for-service-stability: true`).
 
 <img width="1892" height="840" alt="image" src="https://github.com/user-attachments/assets/981954f7-9549-4f3c-b81f-604bf485706b" />
 
-## Estructura base del proyecto
+## Base project structure
 
 ```text
 src/
@@ -383,9 +383,9 @@ src/
     transactions/
 ```
 
-## Notas adicionales
+## Additional notes
 
-- Swagger se monta automaticamente al iniciar la app.
-- TypeORM usa `synchronize: false`; la fuente de verdad son las migraciones.
-- Si `DB_HOST` contiene `rds`, la conexion habilita SSL.
-- La pasarela de pagos usa Wompi sandbox por defecto.
+- Swagger is mounted automatically when the app starts.
+- TypeORM uses `synchronize: false`; migrations are the source of truth.
+- If `DB_HOST` contains `rds`, the connection enables SSL.
+- The payment gateway uses Wompi sandbox by default.
